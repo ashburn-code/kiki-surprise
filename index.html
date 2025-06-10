@@ -77,8 +77,7 @@
     left: 70px; /* Adjust this to visually match the gift shape */
     width: 30px;
     height: 30px;
-    /* background: rgba(255, 0, 0, 0.2);  <-- for debug */
-    pointer-events: none; /* Let clicks fall through */
+    pointer-events: none;
     z-index: 15;
   }
 
@@ -130,13 +129,10 @@
   }
 
   @keyframes shake {
-    0%, 100% { transform: scale(3) translateX(0) rotate(0); }
-    20%, 60% { transform: scale(3) translateX(-8px) rotate(-5deg); }
-    40%, 80% { transform: scale(3) translateX(8px) rotate(5deg); }
-  }
-
-  #animation-wrapper.shake {
-    animation: shake 0.6s ease-in-out;
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px) rotate(-6deg); }
+    50% { transform: translateX(6px) rotate(6deg); }
+    75% { transform: translateX(-6px) rotate(-6deg); }
   }
 </style>
 </head>
@@ -165,7 +161,6 @@
   const giftContainer = document.getElementById('gift-animation');
   const jijiContainer = document.getElementById('jiji-animation');
   const animationContainer = document.getElementById('animation-container');
-  const animationWrapper = document.getElementById('animation-wrapper');
   const clickHere = document.getElementById('click-here');
   const meow = document.getElementById('meow-sound');
 
@@ -191,16 +186,30 @@
   jijiContainer.style.display = 'none';
   message.classList.remove('hidden');
 
-  // Add shake animation on page load as a hint
-  window.addEventListener('load', () => {
-    animationWrapper.classList.add('shake');
-    // Remove shake class after animation finishes (0.6s)
-    setTimeout(() => {
-      animationWrapper.classList.remove('shake');
-    }, 600);
-  });
+  let opened = false;
+  let shakeInterval;
+
+  function doShake() {
+    giftContainer.style.animation = 'shake 0.5s ease-in-out';
+    giftContainer.addEventListener('animationend', () => {
+      giftContainer.style.animation = '';
+    }, { once: true });
+  }
+
+  function startShakeLoop() {
+    doShake();
+    shakeInterval = setInterval(() => {
+      if (!opened) {
+        doShake();
+      }
+    }, 3000);
+  }
 
   function openPresent() {
+    if (opened) return;
+    opened = true;
+    clearInterval(shakeInterval);
+    giftContainer.style.animation = '';
     meow.play().catch(() => {});
     message.classList.add('hidden');
     clickHere.style.display = 'none';
@@ -218,6 +227,9 @@
 
   animationContainer.addEventListener('click', openPresent);
   clickHere.addEventListener('click', openPresent);
+
+  // Start shaking after page load
+  window.addEventListener('load', startShakeLoop);
 </script>
 
 </body>
