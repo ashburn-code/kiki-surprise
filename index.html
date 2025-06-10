@@ -70,28 +70,14 @@
     display: none;
   }
 
-  /* Shake animation ONLY on #gift-animation */
-  .shake {
-    animation: shake 0.6s ease-in-out;
-  }
-
-  @keyframes shake {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    20% { transform: translate(-3px, 3px) rotate(-5deg); }
-    40% { transform: translate(3px, -3px) rotate(5deg); }
-    60% { transform: translate(-3px, 3px) rotate(-5deg); }
-    80% { transform: translate(3px, -3px) rotate(5deg); }
-  }
-
-  /* This is the invisible anchor box positioned over the visible gift's top-left corner */
+  /* Invisible anchor box positioned over the gift's top-left corner */
   #click-anchor {
     position: absolute;
-    top: 130px; /* Adjust this to visually match the gift shape */
-    left: 70px; /* Adjust this to visually match the gift shape */
+    top: 130px;
+    left: 70px;
     width: 30px;
     height: 30px;
-    /* background: rgba(255, 0, 0, 0.2);  <-- for debug */
-    pointer-events: none; /* Let clicks fall through */
+    pointer-events: none;
     z-index: 15;
   }
 
@@ -134,120 +120,4 @@
 
   @keyframes pulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-  }
-
-  @keyframes bounce {
-    0%, 100% { transform: rotate(45deg) translate(-50%, -50%) translateY(0); }
-    50% { transform: rotate(45deg) translate(-50%, -50%) translateY(6px); }
-  }
-</style>
-</head>
-<body>
-
-<div id="message">
-  A Special Delivery for Kiki!
-</div>
-
-<div id="animation-container" role="button" tabindex="0" aria-label="Open present">
-  <div id="animation-wrapper">
-    <div id="gift-animation" class="shake"></div>
-    <div id="jiji-animation"></div>
-  </div>
-  
-  <div id="click-anchor">
-    <div id="click-here" aria-hidden="true">Click here</div>
-  </div>
-</div>
-
-<audio id="meow-sound" src="assets/meow.wav" preload="auto"></audio>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
-<script>
-  const message = document.getElementById('message');
-  const giftContainer = document.getElementById('gift-animation');
-  const jijiContainer = document.getElementById('jiji-animation');
-  const animationContainer = document.getElementById('animation-container');
-  const clickHere = document.getElementById('click-here');
-  const meow = document.getElementById('meow-sound');
-
-  const giftAnimationPath = 'assets/gift.json';
-  const jijiAnimationPath = 'assets/jiji.json';
-
-  const giftAnimation = lottie.loadAnimation({
-    container: giftContainer,
-    renderer: 'svg',
-    loop: false,
-    autoplay: false,
-    path: giftAnimationPath
-  });
-
-  const jijiAnimation = lottie.loadAnimation({
-    container: jijiContainer,
-    renderer: 'svg',
-    loop: true,
-    autoplay: false,
-    path: jijiAnimationPath
-  });
-
-  jijiContainer.style.display = 'none';
-  message.classList.remove('hidden');
-
-  let shakeInterval;
-
-  function startShake() {
-    giftContainer.classList.add('shake');
-  }
-
-  function stopShake() {
-    giftContainer.classList.remove('shake');
-  }
-
-  function scheduleShakeLoop() {
-    // Clear any existing intervals
-    if (shakeInterval) clearInterval(shakeInterval);
-
-    // Shake every 3 seconds, with each shake lasting 0.6s
-    startShake();
-    shakeInterval = setInterval(() => {
-      startShake();
-      // Remove shake class after animation ends (600ms)
-      setTimeout(stopShake, 600);
-    }, 3000);
-  }
-
-  scheduleShakeLoop();
-
-  function openPresent() {
-    // Stop shake loop on click
-    clearInterval(shakeInterval);
-    stopShake();
-
-    // Hide message and "Click here"
-    message.classList.add('hidden');
-    clickHere.style.display = 'none';
-
-    // Play gift opening animation
-    giftAnimation.goToAndPlay(0, true);
-
-    giftAnimation.addEventListener('complete', () => {
-      giftContainer.style.display = 'none';
-      jijiContainer.style.display = 'block';
-      jijiAnimation.play();
-
-      // Delay meow sound by 2 seconds after gift opens
-      setTimeout(() => {
-        meow.play().catch(() => {});
-      }, 1000);
-
-      message.textContent = "Surprise! It’s Jiji! :3 🐾💖";
-      message.classList.remove('hidden');
-    }, { once: true });
-  }
-
-  animationContainer.addEventListener('click', openPresent);
-  clickHere.addEventListener('click', openPresent);
-</script>
-
-</body>
-</html>
+    50% { opacity: 0.6;
