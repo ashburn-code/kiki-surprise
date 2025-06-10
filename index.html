@@ -130,9 +130,9 @@
   }
 
   @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    20%, 60% { transform: translateX(-8px) rotate(-5deg); }
-    40%, 80% { transform: translateX(8px) rotate(5deg); }
+    0%, 100% { transform: scale(3) translateX(0) rotate(0); }
+    20%, 60% { transform: scale(3) translateX(-8px) rotate(-5deg); }
+    40%, 80% { transform: scale(3) translateX(8px) rotate(5deg); }
   }
 
   #animation-wrapper.shake {
@@ -165,6 +165,7 @@
   const giftContainer = document.getElementById('gift-animation');
   const jijiContainer = document.getElementById('jiji-animation');
   const animationContainer = document.getElementById('animation-container');
+  const animationWrapper = document.getElementById('animation-wrapper');
   const clickHere = document.getElementById('click-here');
   const meow = document.getElementById('meow-sound');
 
@@ -190,27 +191,30 @@
   jijiContainer.style.display = 'none';
   message.classList.remove('hidden');
 
-  function openPresent() {
-    const wrapper = document.getElementById('animation-wrapper');
-    wrapper.classList.add('shake');
-    meow.play().catch(() => {});
-
+  // Add shake animation on page load as a hint
+  window.addEventListener('load', () => {
+    animationWrapper.classList.add('shake');
+    // Remove shake class after animation finishes (0.6s)
     setTimeout(() => {
-      wrapper.classList.remove('shake');
-      message.classList.add('hidden');
-      clickHere.style.display = 'none';
-      giftAnimation.goToAndPlay(0, true);
+      animationWrapper.classList.remove('shake');
     }, 600);
+  });
+
+  function openPresent() {
+    meow.play().catch(() => {});
+    message.classList.add('hidden');
+    clickHere.style.display = 'none';
+    giftAnimation.goToAndPlay(0, true);
+
+    giftAnimation.addEventListener('complete', () => {
+      giftContainer.style.display = 'none';
+      jijiContainer.style.display = 'block';
+      jijiAnimation.play();
+
+      message.textContent = "Surprise! It’s Jiji! 🐾💖";
+      message.classList.remove('hidden');
+    }, { once: true });
   }
-
-  giftAnimation.addEventListener('complete', () => {
-    giftContainer.style.display = 'none';
-    jijiContainer.style.display = 'block';
-    jijiAnimation.play();
-
-    message.textContent = "Surprise! It’s Jiji! 🐾💖";
-    message.classList.remove('hidden');
-  }, { once: true });
 
   animationContainer.addEventListener('click', openPresent);
   clickHere.addEventListener('click', openPresent);
