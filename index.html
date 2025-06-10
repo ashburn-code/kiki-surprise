@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Special Delivery for Kiki</title>
+<title>Special Delivery for Kiki :3</title>
 <style>
   body {
     margin: 0;
@@ -73,8 +73,8 @@
   /* This is the invisible anchor box positioned over the visible gift's top-left corner */
   #click-anchor {
     position: absolute;
-    top: 130px; /* Adjust this to visually match the gift shape */
-    left: 70px; /* Adjust this to visually match the gift shape */
+    top: 130px;
+    left: 70px;
     width: 30px;
     height: 30px;
     pointer-events: none;
@@ -126,13 +126,6 @@
   @keyframes bounce {
     0%, 100% { transform: rotate(45deg) translate(-50%, -50%) translateY(0); }
     50% { transform: rotate(45deg) translate(-50%, -50%) translateY(6px); }
-  }
-
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-6px) rotate(-6deg); }
-    50% { transform: translateX(6px) rotate(6deg); }
-    75% { transform: translateX(-6px) rotate(-6deg); }
   }
 </style>
 </head>
@@ -186,34 +179,19 @@
   jijiContainer.style.display = 'none';
   message.classList.remove('hidden');
 
-  let opened = false;
-  let shakeInterval;
-
-  function doShake() {
-    giftContainer.style.animation = 'shake 0.5s ease-in-out';
-    giftContainer.addEventListener('animationend', () => {
-      giftContainer.style.animation = '';
-    }, { once: true });
-  }
-
-  function startShakeLoop() {
-    doShake();
-    shakeInterval = setInterval(() => {
-      if (!opened) {
-        doShake();
-      }
-    }, 3000);
-  }
-
   function openPresent() {
-    if (opened) return;
-    opened = true;
-    clearInterval(shakeInterval);
-    giftContainer.style.animation = '';
-    meow.play().catch(() => {});
     message.classList.add('hidden');
     clickHere.style.display = 'none';
+
     giftAnimation.goToAndPlay(0, true);
+
+    // Play meow sound around frame 10
+    giftAnimation.addEventListener('enterFrame', function onFrame(e) {
+      if (e.currentTime >= 10) {
+        meow.play().catch(() => {});
+        giftAnimation.removeEventListener('enterFrame', onFrame);
+      }
+    });
 
     giftAnimation.addEventListener('complete', () => {
       giftContainer.style.display = 'none';
@@ -227,9 +205,6 @@
 
   animationContainer.addEventListener('click', openPresent);
   clickHere.addEventListener('click', openPresent);
-
-  // Start shaking after page load
-  window.addEventListener('load', startShakeLoop);
 </script>
 
 </body>
