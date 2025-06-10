@@ -128,6 +128,16 @@
     0%, 100% { transform: rotate(45deg) translate(-50%, -50%) translateY(0); }
     50% { transform: rotate(45deg) translate(-50%, -50%) translateY(6px); }
   }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-8px) rotate(-5deg); }
+    40%, 80% { transform: translateX(8px) rotate(5deg); }
+  }
+
+  #animation-wrapper.shake {
+    animation: shake 0.6s ease-in-out;
+  }
 </style>
 </head>
 <body>
@@ -158,8 +168,8 @@
   const clickHere = document.getElementById('click-here');
   const meow = document.getElementById('meow-sound');
 
-const giftAnimationPath = 'assets/gift.json';
-const jijiAnimationPath = 'assets/jiji.json';
+  const giftAnimationPath = 'assets/gift.json';
+  const jijiAnimationPath = 'assets/jiji.json';
 
   const giftAnimation = lottie.loadAnimation({
     container: giftContainer,
@@ -181,20 +191,26 @@ const jijiAnimationPath = 'assets/jiji.json';
   message.classList.remove('hidden');
 
   function openPresent() {
+    const wrapper = document.getElementById('animation-wrapper');
+    wrapper.classList.add('shake');
     meow.play().catch(() => {});
-    message.classList.add('hidden');
-    clickHere.style.display = 'none';
-    giftAnimation.goToAndPlay(0, true);
 
-    giftAnimation.addEventListener('complete', () => {
-      giftContainer.style.display = 'none';
-      jijiContainer.style.display = 'block';
-      jijiAnimation.play();
-
-      message.textContent = "Surprise! It’s Jiji! 🐾💖";
-      message.classList.remove('hidden');
-    }, { once: true });
+    setTimeout(() => {
+      wrapper.classList.remove('shake');
+      message.classList.add('hidden');
+      clickHere.style.display = 'none';
+      giftAnimation.goToAndPlay(0, true);
+    }, 600);
   }
+
+  giftAnimation.addEventListener('complete', () => {
+    giftContainer.style.display = 'none';
+    jijiContainer.style.display = 'block';
+    jijiAnimation.play();
+
+    message.textContent = "Surprise! It’s Jiji! 🐾💖";
+    message.classList.remove('hidden');
+  }, { once: true });
 
   animationContainer.addEventListener('click', openPresent);
   clickHere.addEventListener('click', openPresent);
