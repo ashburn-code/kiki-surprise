@@ -70,15 +70,17 @@
     display: none;
   }
 
-  /* Shake animation that keeps scale(3) and applies translate + rotate */
-  @keyframes shake {
-    0%, 100% { transform: scale(3) translate(0, 0) rotate(0deg); }
-    20%, 60% { transform: scale(3) translate(-3px, 0) rotate(-2deg); }
-    40%, 80% { transform: scale(3) translate(3px, 0) rotate(2deg); }
+  /* Shake animation ONLY on #gift-animation */
+  .shake {
+    animation: shake 0.6s ease-in-out;
   }
 
-  .shake {
-    animation: shake 0.5s ease infinite;
+  @keyframes shake {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    20% { transform: translate(-3px, 3px) rotate(-5deg); }
+    40% { transform: translate(3px, -3px) rotate(5deg); }
+    60% { transform: translate(-3px, 3px) rotate(-5deg); }
+    80% { transform: translate(3px, -3px) rotate(5deg); }
   }
 
   /* This is the invisible anchor box positioned over the visible gift's top-left corner */
@@ -148,8 +150,8 @@
 </div>
 
 <div id="animation-container" role="button" tabindex="0" aria-label="Open present">
-  <div id="animation-wrapper" class="shake">
-    <div id="gift-animation"></div>
+  <div id="animation-wrapper">
+    <div id="gift-animation" class="shake"></div>
     <div id="jiji-animation"></div>
   </div>
   
@@ -168,7 +170,6 @@
   const animationContainer = document.getElementById('animation-container');
   const clickHere = document.getElementById('click-here');
   const meow = document.getElementById('meow-sound');
-  const animationWrapper = document.getElementById('animation-wrapper');
 
   const giftAnimationPath = 'assets/gift.json';
   const jijiAnimationPath = 'assets/jiji.json';
@@ -192,33 +193,41 @@
   jijiContainer.style.display = 'none';
   message.classList.remove('hidden');
 
-  let shakeTimeout;
+  let shakeInterval;
 
   function startShake() {
-    animationWrapper.classList.add('shake');
+    giftContainer.classList.add('shake');
   }
 
   function stopShake() {
-    animationWrapper.classList.remove('shake');
+    giftContainer.classList.remove('shake');
   }
 
-  function scheduleShake() {
-    clearTimeout(shakeTimeout);
-    shakeTimeout = setTimeout(() => {
+  function scheduleShakeLoop() {
+    // Clear any existing intervals
+    if (shakeInterval) clearInterval(shakeInterval);
+
+    // Shake every 3 seconds, with each shake lasting 0.6s
+    startShake();
+    shakeInterval = setInterval(() => {
       startShake();
-    }, 2000); // 2 seconds idle before shaking restarts
+      // Remove shake class after animation ends (600ms)
+      setTimeout(stopShake, 600);
+    }, 3000);
   }
+
+  scheduleShakeLoop();
 
   function openPresent() {
-    stopShake(); // stop shaking immediately when clicked
+    // Stop shake loop on click
+    clearInterval(shakeInterval);
+    stopShake();
 
-    // Delay meow a tiny bit so it feels synced with animation
-    setTimeout(() => {
-      meow.play().catch(() => {});
-    }, 350);
-
+    // Hide message and "Click here"
     message.classList.add('hidden');
     clickHere.style.display = 'none';
+
+    // Play gift opening animation
     giftAnimation.goToAndPlay(0, true);
 
     giftAnimation.addEventListener('complete', () => {
@@ -226,33 +235,18 @@
       jijiContainer.style.display = 'block';
       jijiAnimation.play();
 
-      message.textContent = "Surprise! It’s Jiji! 🐾💖";
+      // Delay meow sound by 2 seconds after gift opens
+      setTimeout(() => {
+        meow.play().catch(() => {});
+      }, 2000);
+
+      message.textContent = "Surprise! It’s Jiji! :3 🐾💖";
       message.classList.remove('hidden');
     }, { once: true });
   }
 
-  animationContainer.addEventListener('click', () => {
-    openPresent();
-  });
-
-  clickHere.addEventListener('click', () => {
-    openPresent();
-  });
-
-  // Start shaking immediately on page load
-  startShake();
-  // Schedule repeating shake if idle
-  scheduleShake();
-
-  // Reset idle timer and shake animation when user interacts with animationContainer
-  animationContainer.addEventListener('mousemove', () => {
-    stopShake();
-    scheduleShake();
-  });
-  animationContainer.addEventListener('touchstart', () => {
-    stopShake();
-    scheduleShake();
-  });
+  animationContainer.addEventListener('click', openPresent);
+  clickHere.addEventListener('click', openPresent);
 </script>
 
 </body>
