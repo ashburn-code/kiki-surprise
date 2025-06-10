@@ -70,6 +70,19 @@
     display: none;
   }
 
+  /* Shake animation ONLY on #gift-animation */
+  .shake {
+    animation: shake 0.6s ease-in-out;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    20% { transform: translate(-3px, 3px) rotate(-5deg); }
+    40% { transform: translate(3px, -3px) rotate(5deg); }
+    60% { transform: translate(-3px, 3px) rotate(-5deg); }
+    80% { transform: translate(3px, -3px) rotate(5deg); }
+  }
+
   /* This is the invisible anchor box positioned over the visible gift's top-left corner */
   #click-anchor {
     position: absolute;
@@ -77,6 +90,7 @@
     left: 70px; /* Adjust this to visually match the gift shape */
     width: 30px;
     height: 30px;
+    /* background: rgba(255, 0, 0, 0.2);  <-- for debug */
     pointer-events: none; /* Let clicks fall through */
     z-index: 15;
   }
@@ -127,12 +141,6 @@
     0%, 100% { transform: rotate(45deg) translate(-50%, -50%) translateY(0); }
     50% { transform: rotate(45deg) translate(-50%, -50%) translateY(6px); }
   }
-
-  @keyframes shake {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    20%, 60% { transform: translate(-4px, 0) rotate(-4deg); }
-    40%, 80% { transform: translate(4px, 0) rotate(4deg); }
-  }
 </style>
 </head>
 <body>
@@ -142,8 +150,8 @@
 </div>
 
 <div id="animation-container" role="button" tabindex="0" aria-label="Open present">
-  <div id="animation-wrapper" id="shake-target">
-    <div id="gift-animation"></div>
+  <div id="animation-wrapper">
+    <div id="gift-animation" class="shake"></div>
     <div id="jiji-animation"></div>
   </div>
   
@@ -162,7 +170,6 @@
   const animationContainer = document.getElementById('animation-container');
   const clickHere = document.getElementById('click-here');
   const meow = document.getElementById('meow-sound');
-  const animationWrapper = document.getElementById('animation-wrapper');
 
   const giftAnimationPath = 'assets/gift.json';
   const jijiAnimationPath = 'assets/jiji.json';
@@ -186,26 +193,41 @@
   jijiContainer.style.display = 'none';
   message.classList.remove('hidden');
 
-  // Start initial shake loop every 3 seconds
-  function startShakeLoop() {
-    animationWrapper.classList.add('shake');
-    setTimeout(() => {
-      animationWrapper.classList.remove('shake');
-    }, 600);
+  let shakeInterval;
+
+  function startShake() {
+    giftContainer.classList.add('shake');
   }
 
-  // Initial shake immediately, then every 3 seconds
-  startShakeLoop();
-  const shakeInterval = setInterval(startShakeLoop, 3000);
+  function stopShake() {
+    giftContainer.classList.remove('shake');
+  }
+
+  function scheduleShakeLoop() {
+    // Clear any existing intervals
+    if (shakeInterval) clearInterval(shakeInterval);
+
+    // Shake every 3 seconds, with each shake lasting 0.6s
+    startShake();
+    shakeInterval = setInterval(() => {
+      startShake();
+      // Remove shake class after animation ends (600ms)
+      setTimeout(stopShake, 600);
+    }, 3000);
+  }
+
+  scheduleShakeLoop();
 
   function openPresent() {
+    // Stop shake loop on click
     clearInterval(shakeInterval);
-    animationWrapper.classList.remove('shake');
-    meow.pause();
-    meow.currentTime = 0;
-    setTimeout(() => meow.play().catch(() => {}), 700); // Delay meow slightly
+    stopShake();
+
+    // Hide message and "Click here"
     message.classList.add('hidden');
     clickHere.style.display = 'none';
+
+    // Play gift opening animation
     giftAnimation.goToAndPlay(0, true);
 
     giftAnimation.addEventListener('complete', () => {
@@ -213,7 +235,12 @@
       jijiContainer.style.display = 'block';
       jijiAnimation.play();
 
-      message.textContent = "Surprise! It’s Jiji! 🐾💖";
+      // Delay meow sound by 2 seconds after gift opens
+      setTimeout(() => {
+        meow.play().catch(() => {});
+      }, 2000);
+
+      message.textContent = "Surprise! It’s Jiji! :3 🐾💖";
       message.classList.remove('hidden');
     }, { once: true });
   }
