@@ -187,7 +187,7 @@
 
     // Play meow sound around frame 10
     giftAnimation.addEventListener('enterFrame', function onFrame(e) {
-      if (e.currentTime >= 10) {
+      if (e.currentTime >= 14) {
         meow.play().catch(() => {});
         giftAnimation.removeEventListener('enterFrame', onFrame);
       }
