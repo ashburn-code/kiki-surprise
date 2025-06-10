@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Special Delivery for Kiki :3</title>
+<title>Special Delivery for Kiki</title>
 <style>
   body {
     margin: 0;
@@ -58,6 +58,18 @@
     transform: scale(3);
   }
 
+  /* Shake animation */
+  @keyframes shake {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(-3px, 0) rotate(-5deg); }
+    50% { transform: translate(3px, 0) rotate(5deg); }
+    75% { transform: translate(-3px, 0) rotate(-5deg); }
+  }
+
+  .shake {
+    animation: shake 0.5s;
+  }
+
   #gift-animation, #jiji-animation {
     position: absolute;
     top: 0; left: 0;
@@ -73,8 +85,8 @@
   /* This is the invisible anchor box positioned over the visible gift's top-left corner */
   #click-anchor {
     position: absolute;
-    top: 130px;
-    left: 70px;
+    top: 130px; /* Adjust this to visually match the gift shape */
+    left: 70px; /* Adjust this to visually match the gift shape */
     width: 30px;
     height: 30px;
     pointer-events: none;
@@ -132,7 +144,7 @@
 <body>
 
 <div id="message">
-  A Special Delivery for Kiki! :3
+  A Special Delivery for Kiki!
 </div>
 
 <div id="animation-container" role="button" tabindex="0" aria-label="Open present">
@@ -154,6 +166,7 @@
   const giftContainer = document.getElementById('gift-animation');
   const jijiContainer = document.getElementById('jiji-animation');
   const animationContainer = document.getElementById('animation-container');
+  const animationWrapper = document.getElementById('animation-wrapper');
   const clickHere = document.getElementById('click-here');
   const meow = document.getElementById('meow-sound');
 
@@ -179,19 +192,33 @@
   jijiContainer.style.display = 'none';
   message.classList.remove('hidden');
 
+  let shakeInterval;
+
+  function startShaking() {
+    animationWrapper.classList.add('shake');
+    setTimeout(() => {
+      animationWrapper.classList.remove('shake');
+    }, 500);
+  }
+
+  function scheduleShake() {
+    shakeInterval = setInterval(() => {
+      startShaking();
+    }, 3000);
+  }
+
+  // Start shaking immediately and schedule continuous shaking
+  startShaking();
+  scheduleShake();
+
   function openPresent() {
+    clearInterval(shakeInterval); // stop shaking
+    animationWrapper.classList.remove('shake');
+
+    meow.play().catch(() => {});
     message.classList.add('hidden');
     clickHere.style.display = 'none';
-
     giftAnimation.goToAndPlay(0, true);
-
-    // Play meow sound around frame 10
-    giftAnimation.addEventListener('enterFrame', function onFrame(e) {
-      if (e.currentTime >= 20) {
-        meow.play().catch(() => {});
-        giftAnimation.removeEventListener('enterFrame', onFrame);
-      }
-    });
 
     giftAnimation.addEventListener('complete', () => {
       giftContainer.style.display = 'none';
