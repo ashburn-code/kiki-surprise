@@ -1,2 +1,2 @@
 Surprise Gift
-A magical interactive surprise for Kiki 💌🎁
+A magical interactive surprise  💌🎁
