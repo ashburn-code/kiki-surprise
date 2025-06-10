@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Special Delivery for Kiki</title>
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    background: linear-gradient(180deg, #ffd1dc 0%, #9b59b6 100%);
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    user-select: none;
+  }
+
+  #message {
+    margin: 40px 0 20px;
+    background: #ffcee7;
+    color: #d6336c;
+    padding: 30px 50px;
+    border-radius: 50px;
+    font-size: 3.2rem;
+    text-align: center;
+    max-width: 700px;
+    box-shadow: 0 12px 30px rgba(214, 51, 108, 0.6);
+    font-weight: 700;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+    z-index: 30;
+  }
+
+  #message.hidden {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  #animation-container {
+    position: relative;
+    width: 520px;
+    height: 520px;
+    cursor: pointer;
+    z-index: 10;
+    margin-bottom: 40px;
+  }
+
+  #animation-wrapper {
+    position: relative;
+    width: 173px;
+    height: 173px;
+    transform-origin: top left;
+    transform: scale(3);
+  }
+
+  #gift-animation, #jiji-animation {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  #jiji-animation {
+    display: none;
+  }
+
+  /* This is the invisible anchor box positioned over the visible gift's top-left corner */
+  #click-anchor {
+    position: absolute;
+    top: 130px; /* Adjust this to visually match the gift shape */
+    left: 70px; /* Adjust this to visually match the gift shape */
+    width: 30px;
+    height: 30px;
+    /* background: rgba(255, 0, 0, 0.2);  <-- for debug */
+    pointer-events: none; /* Let clicks fall through */
+    z-index: 15;
+  }
+
+  #click-here {
+    position: absolute;
+    top: -40px;
+    left: 100%;
+    font-size: 2rem;
+    color: #d6336c;
+    font-weight: 700;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    cursor: pointer;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    animation: pulse 2s infinite;
+    z-index: 20;
+    background: rgba(255 255 255 / 0.75);
+    padding: 4px 14px 4px 10px;
+    border-radius: 18px;
+    box-shadow: 0 2px 8px rgba(214, 51, 108, 0.5);
+    pointer-events: auto;
+    white-space: nowrap;
+  }
+
+  #click-here::after {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid #d6336c;
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: rotate(45deg) translate(-50%, -50%);
+    animation: bounce 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: rotate(45deg) translate(-50%, -50%) translateY(0); }
+    50% { transform: rotate(45deg) translate(-50%, -50%) translateY(6px); }
+  }
+</style>
+</head>
+<body>
+
+<div id="message">
+  A Special Delivery for Kiki!
+</div>
+
+<div id="animation-container" role="button" tabindex="0" aria-label="Open present">
+  <div id="animation-wrapper">
+    <div id="gift-animation"></div>
+    <div id="jiji-animation"></div>
+  </div>
+  
+  <div id="click-anchor">
+    <div id="click-here" aria-hidden="true">Click here</div>
+  </div>
+</div>
+
+<audio id="meow-sound" src="YOUR_MEOW_SOUND_HERE" preload="auto"></audio>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
+<script>
+  const message = document.getElementById('message');
+  const giftContainer = document.getElementById('gift-animation');
+  const jijiContainer = document.getElementById('jiji-animation');
+  const animationContainer = document.getElementById('animation-container');
+  const clickHere = document.getElementById('click-here');
+  const meow = document.getElementById('meow-sound');
+
+const giftAnimationPath = 'assets/gift.json';
+const jijiAnimationPath = 'assets/jiji.json';
+
+  const giftAnimation = lottie.loadAnimation({
+    container: giftContainer,
+    renderer: 'svg',
+    loop: false,
+    autoplay: false,
+    path: giftAnimationPath
+  });
+
+  const jijiAnimation = lottie.loadAnimation({
+    container: jijiContainer,
+    renderer: 'svg',
+    loop: true,
+    autoplay: false,
+    path: jijiAnimationPath
+  });
+
+  jijiContainer.style.display = 'none';
+  message.classList.remove('hidden');
+
+  function openPresent() {
+    meow.play().catch(() => {});
+    message.classList.add('hidden');
+    clickHere.style.display = 'none';
+    giftAnimation.goToAndPlay(0, true);
+
+    giftAnimation.addEventListener('complete', () => {
+      giftContainer.style.display = 'none';
+      jijiContainer.style.display = 'block';
+      jijiAnimation.play();
+
+      message.textContent = "Surprise! It’s Jiji! 🐾💖";
+      message.classList.remove('hidden');
+    }, { once: true });
+  }
+
+  animationContainer.addEventListener('click', openPresent);
+  clickHere.addEventListener('click', openPresent);
+</script>
+
+</body>
+</html>
